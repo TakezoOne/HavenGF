@@ -1,6 +1,8 @@
 import json
 import os
 import openai
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 
@@ -84,19 +86,7 @@ async def gpt_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Ошибка при обращении к GPT.")
         print("GPT Error:", e)
 
-# Запуск бота
-app = ApplicationBuilder().token(TG_TOKEN).build()
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("help", help_command))
-app.add_handler(CommandHandler("add_ingredient", add_ingredient))
-app.add_handler(CommandHandler("use_ingredient", use_ingredient))
-app.add_handler(CommandHandler("show_ingredients", show_ingredients))
-app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), gpt_answer))
-app.run_polling()
 # === Фейковый веб-сервер, чтобы Render не ругался ===
-import threading
-from http.server import BaseHTTPRequestHandler, HTTPServer
-
 class PingHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -108,4 +98,15 @@ def run_fake_web_server():
     server = HTTPServer(("", port), PingHandler)
     server.serve_forever()
 
-threading.Thread(target=run_fake_web_server).start()
+# 🔃 Сначала запускаем фейковый сервер
+threading.Thread(target=run_fake_web_server, daemon=True).start()
+
+# 🔃 Затем запускаем Telegram-бота
+app = ApplicationBuilder().token(TG_TOKEN).build()
+app.add_handler(CommandHandler("start", start))
+app.add_handler(CommandHandler("help", help_command))
+app.add_handler(CommandHandler("add_ingredient", add_ingredient))
+app.add_handler(CommandHandler("use_ingredient", use_ingredient))
+app.add_handler(CommandHandler("show_ingredients", show_ingredients))
+app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), gpt_answer))
+app.run_polling()
