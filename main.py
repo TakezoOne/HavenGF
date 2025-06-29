@@ -17,7 +17,7 @@ from commands.need_to_buy import handle_need_to_buy
 from commands.set_minimum import handle_set_minimum
 
 # Устанавливаем ключ OpenAI
-openai.api_key = OPENAI_API_KEY
+openai.api_key = "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"
 
 # === Фейковый веб-сервер для Render ===
 class PingHandler(BaseHTTPRequestHandler):
