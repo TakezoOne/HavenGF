@@ -9,12 +9,12 @@ from telegram.ext import (
     ContextTypes,
     filters
 )
-import openai
+from openai import OpenAI
 
 # ✅ ВПИСАННЫЕ КЛЮЧИ
 TG_TOKEN = "7915029504:AAE7yFJxud86Mh1SX7HcSEqgMGjiyGMBnDE"
 OPENAI_KEY = "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"
-client = openai.OpenAI(api_key=OPENAI_KEY)
+client = OpenAI(api_key=OPENAI_KEY)
 
 # 📂 Импорт команд
 from commands.returns import handle_return
