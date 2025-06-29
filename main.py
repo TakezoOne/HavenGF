@@ -7,7 +7,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, Con
 
 from config import TG_TOKEN, OPENAI_API_KEY
 from commands.returns import handle_return
-from commands.need_to_buy import handle_need_to_buy  # добавляем новую команду
+from commands.need_to_buy import handle_need_to_buy
 
 openai.api_key = OPENAI_API_KEY
 
@@ -34,7 +34,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Або просто пиши питання природною мовою!"
     )
 
-# GPT
+# GPT-відповіді
 async def gpt_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text
     try:
