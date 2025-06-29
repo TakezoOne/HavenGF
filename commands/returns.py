@@ -14,7 +14,7 @@ async def return_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         name = context.args[0].lower()
         amount = float(context.args[1])
     except (IndexError, ValueError):
-        await update.message.reply_text("⚠️ Приклад: /повернення хліб 3")
+        await update.message.reply_text("⚠️ Приклад: /return хліб 3")
         return
 
     add_to_history({
@@ -25,5 +25,5 @@ async def return_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     })
     await update.message.reply_text(f"✅ Повернення зафіксовано: {amount} × {name}")
 
-# 👇 Объект-хендлер
-handle_return = CommandHandler("повернення", return_command)
+# 👇 Объект-хендлер (название команды обязательно на латинице!)
+handle_return = CommandHandler("return", return_command)
