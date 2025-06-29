@@ -8,7 +8,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, Con
 from config import TG_TOKEN, OPENAI_API_KEY
 from commands.returns import handle_return
 from commands.need_to_buy import handle_need_to_buy
-from commands.set_minimum import handle_set_minimum  # ✅ Новая команда
+from commands.set_minimum import handle_set_minimum
 
 openai.api_key = OPENAI_API_KEY
 
@@ -30,7 +30,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "/повернення [назва] [кількість] — запис повернення продукції\n"
+        "/return [назва] [кількість] — запис повернення продукції\n"
         "/shcho_kupyty — список інгредієнтів, яких не вистачає\n"
         "/minimum [назва] [кількість] — встановити мінімум для інгредієнта\n"
         "Або просто пиши питання природною мовою!"
