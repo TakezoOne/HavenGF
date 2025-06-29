@@ -17,4 +17,4 @@ async def set_minimum_command(update: Update, context: ContextTypes.DEFAULT_TYPE
     except:
         await update.message.reply_text("⚠️ Використання: /мінімум [назва] [кількість]")
 
-handle_set_minimum = CommandHandler("мінімум", set_minimum_command)
+handle_set_minimum = CommandHandler("minimum", set_minimum_command)
