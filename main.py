@@ -1,4 +1,4 @@
-import openai
+import os
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from telegram import Update
@@ -9,10 +9,12 @@ from telegram.ext import (
     ContextTypes,
     filters
 )
+import openai
 
 # ✅ ВПИСАННЫЕ КЛЮЧИ
 TG_TOKEN = "7915029504:AAE7yFJxud86Mh1SX7HcSEqgMGjiyGMBnDE"
-openai.api_key = "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"
+OPENAI_KEY = "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"
+client = openai.OpenAI(api_key=OPENAI_KEY)
 
 # 📂 Импорт команд
 from commands.returns import handle_return
@@ -27,7 +29,6 @@ class PingHandler(BaseHTTPRequestHandler):
         self.wfile.write(b"Bot is running!")
 
 def run_fake_web_server():
-    import os
     port = int(os.environ.get("PORT", 10000))
     server = HTTPServer(("", port), PingHandler)
     server.serve_forever()
@@ -49,17 +50,14 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def gpt_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {
-                    "role": "system",
-                    "content": "Ти — розумний помічник пекаря. Відповідай українською мовою, коротко і по суті. Працюй тільки з виробничими питаннями."
-                },
+                {"role": "system", "content": "Ти — розумний помічник пекаря. Відповідай українською мовою, коротко і по суті. Працюй тільки з виробничими питаннями."},
                 {"role": "user", "content": user_message}
             ]
         )
-        reply = response['choices'][0]['message']['content']
+        reply = response.choices[0].message.content
         print("GPT ВІДПОВІДЬ:", reply)
         await update.message.reply_text(reply)
     except Exception as e:
