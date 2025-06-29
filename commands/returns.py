@@ -23,3 +23,6 @@ async def handle_return(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "від": user_id
     })
     await update.message.reply_text(f"✅ Повернення зафіксовано: {amount} × {name}")
+from telegram.ext import CommandHandler
+
+handle_return = CommandHandler("return", return_command)
