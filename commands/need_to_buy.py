@@ -19,4 +19,4 @@ async def need_to_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(message)
 
-handle_need_to_buy = CommandHandler("що_купити", need_to_buy)
+handle_need_to_buy = CommandHandler("shcho_kupyty", need_to_buy)
