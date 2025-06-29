@@ -8,6 +8,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, Con
 from config import TG_TOKEN, OPENAI_API_KEY
 from commands.returns import handle_return
 from commands.need_to_buy import handle_need_to_buy
+from commands.set_minimum import handle_set_minimum  # 👈 новая команда
 
 openai.api_key = OPENAI_API_KEY
 
@@ -31,6 +32,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "/повернення [назва] [кількість] — запис повернення продукції\n"
         "/що_купити — список інгредієнтів, яких не вистачає\n"
+        "/мінімум [назва] [кількість] — встановити мінімум\n"
         "Або просто пиши питання природною мовою!"
     )
 
@@ -59,5 +61,6 @@ app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("help", help_command))
 app.add_handler(handle_return)
 app.add_handler(handle_need_to_buy)
+app.add_handler(handle_set_minimum)  # 👈 добавили сюда
 app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), gpt_answer))
 app.run_polling()
