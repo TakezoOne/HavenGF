@@ -20,3 +20,7 @@ async def need_to_buy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(message)
 
 handle_need_to_buy = CommandHandler("shcho_kupyty", need_to_buy)
+from telegram.ext import CommandHandler
+
+handle_need_to_buy = CommandHandler("need_to_buy", need_to_buy)
+
