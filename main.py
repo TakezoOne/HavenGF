@@ -93,3 +93,19 @@ app.add_handler(CommandHandler("use_ingredient", use_ingredient))
 app.add_handler(CommandHandler("show_ingredients", show_ingredients))
 app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), gpt_answer))
 app.run_polling()
+# === Фейковый веб-сервер, чтобы Render не ругался ===
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+class PingHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"Bot is running!")
+
+def run_fake_web_server():
+    port = int(os.environ.get("PORT", 10000))
+    server = HTTPServer(("", port), PingHandler)
+    server.serve_forever()
+
+threading.Thread(target=run_fake_web_server).start()
