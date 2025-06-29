@@ -1,12 +1,7 @@
 import json
 import os
-from config import DEFAULT_MINIMUMS
-
-DATA_DIR = "data"
-INGREDIENTS_FILE = os.path.join(DATA_DIR, "ingredients.json")
-MINIMUMS_FILE = os.path.join(DATA_DIR, "minimums.json")
-HISTORY_FILE = os.path.join(DATA_DIR, "history.json")
-RECIPE_FILE = os.path.join(DATA_DIR, "recipe.json")
+from datetime import datetime
+from config import INGREDIENTS_FILE, MINIMUMS_FILE, HISTORY_FILE, RECIPE_FILE, DEFAULT_MINIMUMS
 
 def load_json(path):
     if os.path.exists(path):
@@ -25,7 +20,7 @@ def get_ingredients():
 def save_ingredients(data):
     save_json(INGREDIENTS_FILE, data)
 
-# --- Минимумы ---
+# --- Минимальные уровни ---
 def get_minimums():
     data = load_json(MINIMUMS_FILE)
     return {**DEFAULT_MINIMUMS, **data}
@@ -35,10 +30,9 @@ def save_minimum(name, amount):
     data[name] = amount
     save_json(MINIMUMS_FILE, data)
 
-# --- История ---
+# --- История действий ---
 def add_to_history(entry):
     data = load_json(HISTORY_FILE)
-    from datetime import datetime
     now = datetime.now().isoformat()
     data[now] = entry
     save_json(HISTORY_FILE, data)
