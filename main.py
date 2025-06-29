@@ -1,4 +1,3 @@
-import json
 import os
 import openai
 import threading
@@ -7,7 +6,8 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 
 from config import TG_TOKEN, OPENAI_API_KEY
-from commands.returns import handle_return  # подключаем новую команду
+from commands.returns import handle_return
+from commands.need_to_buy import handle_need_to_buy  # добавляем новую команду
 
 openai.api_key = OPENAI_API_KEY
 
@@ -29,21 +29,19 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
-        "/add_ingredient [назва] [кількість]\n"
-        "/use_ingredient [назва] [кількість]\n"
-        "/show_ingredients — показати залишки\n"
-        "/повернення [назва] [кількість] — запис повернення хліба\n"
-        "Або просто пиши запитання природною мовою!"
+        "/повернення [назва] [кількість] — запис повернення продукції\n"
+        "/що_купити — список інгредієнтів, яких не вистачає\n"
+        "Або просто пиши питання природною мовою!"
     )
 
-# GPT-обработка текста
+# GPT
 async def gpt_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text
     try:
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "Ти — розумний помічник пекаря. Відповідай українською мовою, коротко і по суті."},
+                {"role": "system", "content": "Ти — розумний помічник пекаря. Відповідай українською мовою, коротко і по суті. Працюй тільки з виробничими питаннями."},
                 {"role": "user", "content": user_message}
             ]
         )
@@ -53,13 +51,13 @@ async def gpt_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Помилка при зверненні до GPT.")
         print("GPT Error:", e)
 
-# Запускаем фейковый сервер
+# Запуск
 threading.Thread(target=run_fake_web_server, daemon=True).start()
 
-# Запускаем Telegram-бота
 app = ApplicationBuilder().token(TG_TOKEN).build()
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("help", help_command))
-app.add_handler(handle_return)  # добавили хендлер /повернення
+app.add_handler(handle_return)
+app.add_handler(handle_need_to_buy)
 app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), gpt_answer))
 app.run_polling()
