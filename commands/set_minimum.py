@@ -18,3 +18,6 @@ async def set_minimum_command(update: Update, context: ContextTypes.DEFAULT_TYPE
         await update.message.reply_text("⚠️ Використання: /мінімум [назва] [кількість]")
 
 handle_set_minimum = CommandHandler("minimum", set_minimum_command)
+from telegram.ext import CommandHandler
+
+handle_set_minimum = CommandHandler("minimum", set_minimum_command)
