@@ -1,4 +1,3 @@
-import os
 import openai
 import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -11,13 +10,14 @@ from telegram.ext import (
     filters
 )
 
-from config import TG_TOKEN, OPENAI_API_KEY
+# ✅ ВПИСАННЫЕ КЛЮЧИ
+TG_TOKEN = "7915029504:AAE7yFJxud86Mh1SX7HcSEqgMGjiyGMBnDE"
+openai.api_key = "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"
+
+# 📂 Импорт команд
 from commands.returns import handle_return
 from commands.need_to_buy import handle_need_to_buy
 from commands.set_minimum import handle_set_minimum
-
-# Устанавливаем ключ OpenAI
-openai.api_key = "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"
 
 # === Фейковый веб-сервер для Render ===
 class PingHandler(BaseHTTPRequestHandler):
@@ -27,6 +27,7 @@ class PingHandler(BaseHTTPRequestHandler):
         self.wfile.write(b"Bot is running!")
 
 def run_fake_web_server():
+    import os
     port = int(os.environ.get("PORT", 10000))
     server = HTTPServer(("", port), PingHandler)
     server.serve_forever()
@@ -44,7 +45,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Або просто пиши питання природною мовою!"
     )
 
-# Обработка естественного текста (GPT)
+# GPT-відповіді
 async def gpt_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text
     try:
@@ -62,13 +63,13 @@ async def gpt_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
         print("GPT ВІДПОВІДЬ:", reply)
         await update.message.reply_text(reply)
     except Exception as e:
-        await update.message.reply_text("⚠️ Помилка при зверненні до GPT.")
         print("GPT Error:", repr(e))
+        await update.message.reply_text("⚠️ Помилка при зверненні до GPT.")
 
 # Запуск фейкового сервера
 threading.Thread(target=run_fake_web_server, daemon=True).start()
 
-# Создание и настройка приложения
+# Запуск бота
 app = ApplicationBuilder().token(TG_TOKEN).build()
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("help", help_command))
@@ -76,6 +77,4 @@ app.add_handler(handle_return)
 app.add_handler(handle_need_to_buy)
 app.add_handler(handle_set_minimum)
 app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), gpt_answer))
-
-# Запуск бота
 app.run_polling()
