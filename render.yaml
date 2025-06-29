@@ -1,11 +1,7 @@
 services:
   - type: web
-    name: gpt-telegram-bot
+    name: bakery-bot
     env: python
-    buildCommand: ""
+    buildCommand: pip install -r requirements.txt
     startCommand: python main.py
-    envVars:
-      - key: TELEGRAM_BOT_TOKEN
-        sync: false
-      - key: OPENAI_API_KEY
-        sync: false
+    repo: https://github.com/ВАШ_ПОЛЬЗОВАТЕЛЬ/ВАШ_РЕПО
