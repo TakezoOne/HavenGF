@@ -6,7 +6,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Список разрешённых пользователей (добавь свой Telegram ID)
 ALLOWED_USERS = [
-    123456789,  # ← замени на свой настоящий Telegram ID
+    5874151668,  # ← замени на свой настоящий Telegram ID
 ]
 
 # Пути к файлам
