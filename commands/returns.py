@@ -1,9 +1,10 @@
 from telegram import Update
-from telegram.ext import ContextTypes
+from telegram.ext import ContextTypes, CommandHandler
 from storage.storage import add_to_history
 from config import ALLOWED_USERS
 
-async def handle_return(update: Update, context: ContextTypes.DEFAULT_TYPE):
+# 👇 Функция, обрабатывающая команду
+async def return_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     if user_id not in ALLOWED_USERS:
         await update.message.reply_text("⛔ У вас немає доступу до бота.")
@@ -23,6 +24,6 @@ async def handle_return(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "від": user_id
     })
     await update.message.reply_text(f"✅ Повернення зафіксовано: {amount} × {name}")
-from telegram.ext import CommandHandler
 
-handle_return = CommandHandler("return", return_command)
+# 👇 Объект-хендлер
+handle_return = CommandHandler("повернення", return_command)
