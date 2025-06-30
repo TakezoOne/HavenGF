@@ -1,17 +1,17 @@
 import re
+import os
 from telegram import Update
 from telegram.ext import ContextTypes
 from datetime import datetime
 from storage.storage import get_recipe, add_to_history
 from openai import OpenAI
-import os
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 async def handle_production_phrase(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_text = update.message.text.lower()
 
-    # 🔍 Проверка: фраза про виробництво білого хліба
+    # 📌 Распознаём фразы про "білий хліб"
     match = re.search(r'(сьогодні|сегодня)?\s*(\d+)\s+(білих|білий|хлібів)', user_text)
     if match:
         quantity = int(match.group(2))
@@ -43,22 +43,25 @@ async def handle_production_phrase(update: Update, context: ContextTypes.DEFAULT
             "datetime": datetime.now().strftime("%Y-%m-%d %H:%M"),
             "ingredients_used": full_ingredients
         })
-        return
+        return  # Не передаём в GPT, если это була фраза виробництва
 
-    # 💬 Інакше — GPT-відповідь
+    # 🧠 Якщо це не рецепт — GPT відповідає
     try:
+        print("🔧 GPT ЗАПИТ:", user_text)
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "Ти — розумний помічник пекаря. Відповідай українською мовою, коротко і по суті. Працюй тільки з виробничими питаннями."},
+                {"role": "system", "content": "Ти — розумний помічник пекаря. Відповідай українською, коротко і по суті. Працюй тільки з виробничими питаннями."},
                 {"role": "user", "content": user_text}
             ]
         )
         reply = response.choices[0].message.content.strip()
+        print("🔧 GPT ВІДПОВІДЬ:", reply)
+
         if reply:
             await update.message.reply_text(reply)
         else:
             await update.message.reply_text("🤖 GPT не надав відповіді.")
     except Exception as e:
-        print("GPT ERROR:", e)
-        await update.message.reply_text("⚠️ Помилка при зверненні до GPT.")
+        print("❌ GPT ERROR:", e)
+        await update.message.reply_text("❌ Помилка GPT: " + str(e))
