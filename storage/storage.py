@@ -1,44 +1,45 @@
-import re
-from telegram import Update
-from telegram.ext import ContextTypes
+import json
+import os
 from datetime import datetime
-from storage.storage import get_recipe, add_to_history
-from config import HISTORY_FILE
+from config import INGREDIENTS_FILE, MINIMUMS_FILE, HISTORY_FILE, RECIPE_FILE, DEFAULT_MINIMUMS
 
-async def handle_production_phrase(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_text = update.message.text.lower()
+def load_json(path):
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
 
-    match = re.search(r'(\\d+)\\s+(білих|білий|білих хлібів)', user_text)
-    if not match:
-        return  # Не фраза про виробництво
+def save_json(path, data):
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
 
-    quantity = int(match.group(1))
-    recipe_name = 'білий хліб'
+# --- Ингредиенты ---
+def get_ingredients():
+    return load_json(INGREDIENTS_FILE)
 
-    recipes = get_recipe()
-    if recipe_name not in recipes:
-        await update.message.reply_text("⚠️ Рецепт білого хліба не знайдено.")
-        return
+def save_ingredients(data):
+    save_json(INGREDIENTS_FILE, data)
 
-    single_recipe = recipes[recipe_name]
-    full_ingredients = {}
+# --- Минимальные уровни ---
+def get_minimums():
+    data = load_json(MINIMUMS_FILE)
+    return {**DEFAULT_MINIMUMS, **data}
 
-    for ingredient, amount in single_recipe.items():
-        total = round(amount * quantity)
-        full_ingredients[ingredient] = total
+def save_minimum(name, amount):
+    data = load_json(MINIMUMS_FILE)
+    data[name] = amount
+    save_json(MINIMUMS_FILE, data)
 
-    # Форматування відповіді
-    lines = [f"Щоб зробити {quantity} {recipe_name} потрібно:"]
-    for ingredient, total in full_ingredients.items():
-        lines.append(f"• {ingredient}: {total} г")
+# --- История действий ---
+def add_to_history(entry):
+    data = load_json(HISTORY_FILE)
+    now = datetime.now().isoformat()
+    data[now] = entry
+    save_json(HISTORY_FILE, data)
 
-    await update.message.reply_text("\\n".join(lines))
+def get_history():
+    return load_json(HISTORY_FILE)
 
-    # Запис у історію
-    add_to_history({
-        "type": "виробництво",
-        "recipe": recipe_name,
-        "quantity": quantity,
-        "datetime": datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "ingredients_used": full_ingredients
-    })
+# --- Рецепт ---
+def get_recipe():
+    return load_json(RECIPE_FILE)
