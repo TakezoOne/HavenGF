@@ -21,7 +21,7 @@ from commands.returns import handle_return
 from commands.need_to_buy import handle_need_to_buy
 from commands.set_minimum import handle_set_minimum
 
-# 📂 Импорт нового обработчика
+# 📂 Импорт нового обработчика фраз "Сьогодні 100 білих"
 from handlers.gpt_handler import handle_production_phrase
 
 # === Фейковый веб-сервер для Render ===
@@ -49,9 +49,11 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Або просто пиши питання природною мовою!"
     )
 
-# GPT-відповіді
+# GPT-відповіді з логами
 async def gpt_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text
+    print("GPT ЗАПИТ:", user_message)
+
     try:
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
@@ -60,9 +62,15 @@ async def gpt_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 {"role": "user", "content": user_message}
             ]
         )
-        reply = response.choices[0].message.content
+
+        reply = response.choices[0].message.content.strip()
         print("GPT ВІДПОВІДЬ:", reply)
-        await update.message.reply_text(reply)
+
+        if not reply:
+            await update.message.reply_text("🤖 GPT не надав відповіді.")
+        else:
+            await update.message.reply_text(reply)
+
     except Exception as e:
         print("GPT Error:", repr(e))
         await update.message.reply_text("⚠️ Помилка при зверненні до GPT.")
@@ -77,5 +85,6 @@ app.add_handler(CommandHandler("help", help_command))
 app.add_handler(handle_return)
 app.add_handler(handle_need_to_buy)
 app.add_handler(handle_set_minimum)
-app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_production_phrase))  # <== ДОБАВЛЕНО
+app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_production_phrase))  # для "Сьогодні 100 білих"
+app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), gpt_answer))  # GPT відповіді
 app.run_polling()
