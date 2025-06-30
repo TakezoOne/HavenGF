@@ -2,8 +2,8 @@ import re
 from telegram import Update
 from telegram.ext import ContextTypes
 from datetime import datetime
-from storage.storage import load_data, save_data
-from config import RECIPE_PATH, HISTORY_PATH
+from storage.storage import get_recipe, add_to_history
+from config import HISTORY_FILE
 
 async def handle_production_phrase(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_text = update.message.text.lower()
@@ -15,7 +15,7 @@ async def handle_production_phrase(update: Update, context: ContextTypes.DEFAULT
     quantity = int(match.group(1))
     recipe_name = 'білий хліб'
 
-    recipes = load_data(RECIPE_PATH)
+    recipes = get_recipe()
     if recipe_name not in recipes:
         await update.message.reply_text("⚠️ Рецепт білого хліба не знайдено.")
         return
@@ -35,12 +35,10 @@ async def handle_production_phrase(update: Update, context: ContextTypes.DEFAULT
     await update.message.reply_text("\\n".join(lines))
 
     # Запис у історію
-    history = load_data(HISTORY_PATH)
-    history.append({
+    add_to_history({
         "type": "виробництво",
         "recipe": recipe_name,
         "quantity": quantity,
         "datetime": datetime.now().strftime("%Y-%m-%d %H:%M"),
         "ingredients_used": full_ingredients
     })
-    save_data(HISTORY_PATH, history)
