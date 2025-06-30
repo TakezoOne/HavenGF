@@ -49,31 +49,33 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Або просто пиши питання природною мовою!"
     )
 
-# GPT-відповіді з логами
+# GPT-відповіді — диагностическая версия
 async def gpt_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_message = update.message.text
-    print("GPT ЗАПИТ:", user_message)
+    print("🔧 GPT ЗАПИТ:", user_message)
 
     try:
+        print("🔧 ВИКЛИК OpenAI...")
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
-                {"role": "system", "content": "Ти — розумний помічник пекаря. Відповідай українською мовою, коротко і по суті. Працюй тільки з виробничими питаннями."},
+                {"role": "system", "content": "Ти — бот пекарні. Відповідай українською."},
                 {"role": "user", "content": user_message}
             ]
         )
+        print("🔧 ВІДПОВІДЬ ОТРИМАНА")
 
-        reply = response.choices[0].message.content.strip()
-        print("GPT ВІДПОВІДЬ:", reply)
-
-        if not reply:
-            await update.message.reply_text("🤖 GPT не надав відповіді.")
+        if response and response.choices:
+            reply = response.choices[0].message.content.strip()
+            print("🔧 ВІДПОВІДЬ GPT:", reply)
+            await update.message.reply_text(reply or "🤖 GPT не надав відповіді.")
         else:
-            await update.message.reply_text(reply)
+            print("⚠️ Немає відповіді GPT")
+            await update.message.reply_text("⚠️ GPT не відповідає.")
 
     except Exception as e:
-        print("GPT Error:", repr(e))
-        await update.message.reply_text("⚠️ Помилка при зверненні до GPT.")
+        print("❌ GPT ERROR:", repr(e))
+        await update.message.reply_text("❌ Помилка GPT: " + str(e))
 
 # Запуск фейкового сервера
 threading.Thread(target=run_fake_web_server, daemon=True).start()
