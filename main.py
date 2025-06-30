@@ -21,6 +21,9 @@ from commands.returns import handle_return
 from commands.need_to_buy import handle_need_to_buy
 from commands.set_minimum import handle_set_minimum
 
+# 📂 Импорт нового обработчика
+from handlers.gpt_handler import handle_production_phrase
+
 # === Фейковый веб-сервер для Render ===
 class PingHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -74,5 +77,5 @@ app.add_handler(CommandHandler("help", help_command))
 app.add_handler(handle_return)
 app.add_handler(handle_need_to_buy)
 app.add_handler(handle_set_minimum)
-app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), gpt_answer))
+app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_production_phrase))  # <== ДОБАВЛЕНО
 app.run_polling()
