@@ -10,16 +10,18 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 async def handle_production_phrase(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_text = update.message.text.lower()
+    recipes = get_recipe()
 
-    # 📌 Распознаём фразы про "білий хліб"
-    match = re.search(r'(сьогодні|сегодня)?\s*(\d+)\s+(білих|білий|хлібів)', user_text)
+    # 🔍 Сформувати патерн з усіх назв рецептів
+    pattern = r"(сьогодні|сегодня)?\s*(\d+)\s+(" + "|".join(recipes.keys()) + r")"
+    match = re.search(pattern, user_text)
+
     if match:
         quantity = int(match.group(2))
-        recipe_name = 'білий хліб'
+        recipe_name = match.group(3)
 
-        recipes = get_recipe()
         if recipe_name not in recipes:
-            await update.message.reply_text("⚠️ Рецепт білого хліба не знайдено.")
+            await update.message.reply_text(f"⚠️ Рецепт '{recipe_name}' не знайдено.")
             return
 
         single_recipe = recipes[recipe_name]
@@ -28,14 +30,13 @@ async def handle_production_phrase(update: Update, context: ContextTypes.DEFAULT
             for ingredient, amount in single_recipe.items()
         }
 
-        # Відповідь
         lines = [f"🧮 Щоб зробити {quantity} {recipe_name} потрібно:"]
         for ingredient, total in full_ingredients.items():
             lines.append(f"• {ingredient}: {total} г")
 
         await update.message.reply_text("\n".join(lines))
 
-        # Запис в історію
+        # 📝 Запис у історію
         add_to_history({
             "type": "виробництво",
             "recipe": recipe_name,
@@ -43,9 +44,9 @@ async def handle_production_phrase(update: Update, context: ContextTypes.DEFAULT
             "datetime": datetime.now().strftime("%Y-%m-%d %H:%M"),
             "ingredients_used": full_ingredients
         })
-        return  # Не передаём в GPT, если это була фраза виробництва
+        return
 
-    # 🧠 Якщо це не рецепт — GPT відповідає
+    # 🧠 GPT-відповідь
     try:
         print("🔧 GPT ЗАПИТ:", user_text)
         response = client.chat.completions.create(
